@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace TodoListApi.Models
 {
@@ -19,6 +20,8 @@ namespace TodoListApi.Models
         // Clave foránea para el usuario
         [ForeignKey("Usuario")]
         public int UserId { get; set; }
+
+        [JsonIgnore]
         public Usuario Usuario { get; set; } = new Usuario();
     }
 }

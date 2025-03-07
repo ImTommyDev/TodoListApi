@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +29,16 @@ namespace TodoListApi.Controllers
                 .Tareas.Where(t => t.UserId == userId) // Solo tareas del usuario autenticado
                 .ToListAsync();
 
-            return Ok(tareas);
+            // Configurar las opciones de serialización para evitar el ciclo infinito
+            var options = new JsonSerializerOptions
+            {
+                ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve,
+            };
+
+            // Serializar las tareas con las opciones configuradas
+            var json = JsonSerializer.Serialize(tareas, options);
+
+            return Ok(json);
         }
 
         // Obtener una tarea por ID
@@ -45,19 +55,40 @@ namespace TodoListApi.Controllers
                 return NotFound(new { message = "Tarea no encontrada" });
             }
 
-            return Ok(tarea);
+            // Configurar las opciones de serialización para evitar el ciclo infinito
+            var options = new JsonSerializerOptions
+            {
+                ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve,
+            };
+
+            var json = JsonSerializer.Serialize(tarea, options);
+
+            return Ok(json);
         }
 
         // Crear una nueva tarea
+        // Crear una nueva tarea
+        [HttpPost]
         [HttpPost]
         public async Task<IActionResult> CreateTarea([FromBody] Tarea tarea)
         {
+            // Obtener el userId desde el token JWT
             var userId = GetUserIdFromClaims();
-            tarea.UserId = userId; // Asignar el usuario autenticado a la tarea
 
+            // Asignar el UserId del usuario autenticado a la tarea
+            tarea.UserId = userId;
+
+            // Asegurarse de que la tarea no cree un nuevo usuario
+            // Se asume que la propiedad Usuario en la tarea está solo para las relaciones, no para la creación.
+            tarea.Usuario = null; // Asegurarse de que no se asigna un usuario nuevo en la tarea
+
+            // Agregar la tarea al contexto de la base de datos
             _context.Tareas.Add(tarea);
+
+            // Guardar cambios en la base de datos
             await _context.SaveChangesAsync();
 
+            // Retornar la tarea recién creada, incluyendo la URL para obtenerla
             return CreatedAtAction(nameof(GetTareaById), new { id = tarea.Id }, tarea);
         }
 
@@ -109,8 +140,14 @@ namespace TodoListApi.Controllers
         // Obtener el userId desde el token JWT
         private int GetUserIdFromClaims()
         {
-            var userId = User.FindFirstValue("sub");
-            return int.Parse(userId);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier); // Busca el claim con el userId (NameIdentifier)
+
+            if (userIdClaim == null)
+            {
+                throw new InvalidOperationException("El userId no se encuentra en los claims.");
+            }
+
+            return int.Parse(userIdClaim.Value); // Convierte el valor del claim a entero (userId)
         }
     }
 }
