@@ -1,0 +1,49 @@
+﻿# Archivos específicos del usuario
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Resultados de compilación
+bin/
+obj/
+[Bb]uild[Ll]og.*
+*.log
+
+# Directorio de caché de Visual Studio 2015
+.vs/
+
+# Resultados de pruebas
+[Tt]est[Rr]esult*/
+*.trx
+*.coverage
+
+# Archivos generados por paquetes NuGet
+*.nupkg
+**/packages/*
+!**/packages/build/
+
+# Archivos de configuración de publicación
+*.Publish.xml
+*.pubxml
+*.publishproj
+PublishScripts/
+
+# Archivos temporales y de respaldo
+*~
+*.tmp
+*.bak
+*.old
+
+# Archivos de configuración de usuario de Visual Studio Code
+.vscode/
+
+# Archivos de configuración de herramientas de terceros
+_ReSharper*/
+*.DotSettings.user
+*.dotCover
+*.nvuser
+
+# Archivos de caché y temporales del sistema operativo
+[Tt]humbs.db
+[Dd]esktop.ini
