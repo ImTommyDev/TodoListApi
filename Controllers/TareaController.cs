@@ -67,8 +67,6 @@ namespace TodoListApi.Controllers
         }
 
         // Crear una nueva tarea
-        // Crear una nueva tarea
-        [HttpPost]
         [HttpPost]
         public async Task<IActionResult> CreateTarea([FromBody] Tarea tarea)
         {
